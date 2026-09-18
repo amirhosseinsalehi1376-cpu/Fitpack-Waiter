@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>FIT PACK - ویتِر کافه</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#f4f4f4;
+  color:#171717;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif
+}
+
+header{
+  background:#111;
+  color:#fff;
+  text-align:center;
+  padding:17px 14px
+}
+
+header h1{
+  margin:0;
+  font-size:23px
+}
+
+header p{
+  margin:4px 0 0;
+  color:#bbb;
+  font-size:12px
+}
+
+.tabs{
+  display:flex;
+  gap:7px;
+  background:#fff;
+  padding:9px;
+  position:sticky;
+  top:0;
+  z-index:20;
+  box-shadow:0 2px 8px #0001
+}
+
+.tabs button{
+  flex:1;
+  border:0;
+  border-radius:10px;
+  padding:12px 5px;
+  font-weight:800;
+  background:#eee;
+  font-size:14px
+}
+
+.tabs .active{
+  background:#111;
+  color:#fff
+}
+
+.page{
+  display:none;
+  max-width:900px;
+  margin:auto;
+  padding:12px
+}
+
+.page.active{
+  display:block
+}
+
+.panel{
+  background:#fff;
+  border-radius:14px;
+  padding:13px;
+  margin-bottom:12px;
+  box-shadow:0 2px 9px #0000000d
+}
+
+label{
+  display:block;
+  font-weight:800;
+  margin-bottom:6px
+}
+
+input,
+textarea{
+  width:100%;
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:11px;
+  font-size:15px;
+  background:#fafafa
+}
+
+textarea{
+  min-height:68px;
+  margin-top:5px
+}
+
+.title{
+  font-weight:900;
+  font-size:17px;
+  margin-bottom:9px
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px
+}
+
+.item{
+  border:1px solid #ddd;
+  background:#fff;
+  border-radius:12px;
+  padding:10px;
+  text-align:right;
+  min-height:65px;
+  font:inherit;
+  cursor:pointer
+}
+
+.item:active{
+  transform:scale(.98);
+  background:#eee
+}
+
+.name{
+  font-weight:800;
+  font-size:14px;
+  line-height:1.35
+}
+
+.price{
+  font-size:12px;
+  color:#666;
+  margin-top:5px
+}
+
+.order-empty{
+  text-align:center;
+  color:#888;
+  padding:16px
+}
+
+.order-row{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:10px 0;
+  border-bottom:1px solid #eee
+}
+
+.order-row:last-child{
+  border-bottom:0
+}
+
+.info{
+  flex:1;
+  min-width:0
+}
+
+.qty{
+  display:flex;
+  align-items:center;
+  gap:5px
+}
+
+.qty button,
+.remove{
+  width:30px;
+  height:30px;
+  border:0;
+  border-radius:8px;
+  font-size:18px;
+  font-weight:900
+}
+
+.qty button{
+  background:#eee
+}
+
+.remove{
+  background:#ffe8e8;
+  color:#a00
+}
+
+.sub{
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap
+}
+
+.total{
+  display:flex;
+  justify-content:space-between;
+  border-top:2px solid #eee;
+  padding-top:11px;
+  margin-top:8px;
+  font-size:18px;
+  font-weight:900
+}
+
+.primary,
+.secondary{
+  width:100%;
+  padding:13px;
+  border-radius:11px;
+  font-size:15px;
+  font-weight:900;
+  margin-top:9px
+}
+
+.primary{
+  border:0;
+  background:#111;
+  color:#fff
+}
+
+.secondary{
+  background:#fff;
+  border:1px solid #ccc
+}
+
+.invoice h2{
+  text-align:center
+}
+
+.meta{
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+  border-bottom:1px solid #ddd;
+  padding-bottom:9px
+}
+
+.invoice table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px
+}
+
+.invoice th,
+.invoice td{
+  padding:8px 3px;
+  border-bottom:1px solid #eee;
+  text-align:right;
+  font-size:13px
+}
+
+.menu-line{
+  display:flex;
+  justify-content:space-between;
+  padding:9px 0;
+  border-bottom:1px solid #eee;
+  font-size:14px
+}
+
+@media(min-width:650px){
+  .grid{
+    grid-template-columns:repeat(3,1fr)
+  }
+}
+
+@media print{
+  header,
+  .tabs,
+  .no-print{
+    display:none!important
+  }
+
+  .page{
+    display:none!important
+  }
+
+  .page#invoice{
+    display:block!important;
+    padding:0
+  }
+
+  .panel{
+    box-shadow:none
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>FIT PACK</h1>
+  <p>سیستم ثبت سفارش کافه</p>
+</header>
+
+<nav class="tabs">
+  <button class="active" onclick="showPage('order',this)">سفارش</button>
+  <button onclick="showPage('invoice',this)">فاکتور</button>
+  <button onclick="showPage('menu',this)">منو</button>
+</nav>
+
+<section id="order" class="page active">
+
+  <div class="panel">
+
+    <label>شماره میز</label>
+
+    <input
+      id="table"
+      type="number"
+      inputmode="numeric"
+      min="1"
+      placeholder="مثلاً ۵"
+    >
+
+    <label style="margin-top:11px">
+      یادداشت سفارش
+    </label>
+
+    <textarea
+      id="note"
+      placeholder="یادداشت اختیاری..."
+    ></textarea>
+
+  </div>
+
+  <div id="orderMenu"></div>
+
+  <div class="panel">
+
+    <div class="title">
+      سفارش فعلی
+    </div>
+
+    <div id="items">
+      <div class="order-empty">
+        هنوز آیتمی انتخاب نشده
+      </div>
+    </div>
+
+    <div class="total">
+      <span>جمع کل</span>
+      <span id="total">۰ تومان</span>
+    </div>
+
+    <button
+      class="primary"
+      onclick="makeInvoice()"
+    >
+      مشاهده فاکتور
+    </button>
+
+    <button
+      class="secondary"
+      onclick="clearOrder()"
+    >
+      پاک کردن سفارش
+    </button>
+
+  </div>
+
+</section>
+
+
+<section id="invoice" class="page">
+
+  <div class="panel invoice">
+
+    <h2>فاکتور FIT PACK</h2>
+
+    <div class="meta">
+
+      <span>
+        میز:
+        <b id="invTable">-</b>
+      </span>
+
+      <span id="date"></span>
+
+    </div>
+
+    <div id="invRows"></div>
+
+    <div class="total">
+      <span>جمع کل</span>
+      <span id="invTotal">۰ تومان</span>
+    </div>
+
+    <div
+      id="invNote"
+      style="margin-top:10px;font-size:13px"
+    ></div>
+
+  </div>
+
+  <div class="no-print">
+
+    <button
+      class="primary"
+      onclick="window.print()"
+    >
+      چاپ فاکتور
+    </button>
+
+  </div>
+
+</section>
+
+
+<section id="menu" class="page">
+
+  <div
+    class="panel"
+    id="fullMenu"
+  ></div>
+
+</section>
+
+
+<script>
+
+const sections = [
+
+[
+  "نوشیدنی‌ها",
+  [
+    ["سینگل ۱۰۰",75000],
+    ["سینگل ۷۰/۳۰",80000],
+    ["دبل ۱۰۰",90000],
+    ["امریکانو",110000],
+    ["لته",125000],
+    ["کاپوچینو",135000],
+    ["شیر کاکائو",135000],
+    ["هات چاکلت",150000],
+    ["نوشابه لیوانی",60000],
+    ["خانواده",120000],
+    ["قوطی",80000],
+    ["دوغ بهارستان",160000],
+    ["دوغ لیوانی",80000]
+  ]
+],
+
+[
+  "غذاها",
+  [
+    ["سیب زمینی",220000],
+    ["سیب زمینی رژیمی",210000],
+    ["سیب زمینی و بال کتف",330000],
+    ["بال و کتف",240000],
+    ["هر بال و کتف اضافه",60000],
+    ["سیب مرغ",340000],
+    ["سیب مرغ رژیمی",360000],
+    ["سیب زمینی و تخم مرغ آبپز",240000],
+    ["سالاد سزار",490000]
+  ]
+],
+
+[
+  "سس Fat",
+  [
+    ["مایونز — Fat",25000],
+    ["مایونز چیلی — Fat",15000],
+    ["کچاپ — Fat",20000],
+    ["کچاپ تند — Fat",15000],
+    ["فرانسه — Fat",25000],
+    ["هزارجزیره — Fat",25000],
+    ["خردل — Fat",25000],
+    ["انار — Fat",15000],
+    ["چدار — Fat",50000],
+    ["پنیر پارمزان و قارچ — Fat",50000],
+    ["سس سیر — Fat",25000]
+  ]
+],
+
+[
+  "سس Zero",
+  [
+    ["کچاپ — Zero",25000],
+    ["مایونز — Zero",30000],
+    ["هزار جزیره — Zero",35000],
+    ["باربیکیو — Zero",30000]
+  ]
+]
+
+];
+
+
+const order = {};
+
+
+const money = n =>
+  new Intl.NumberFormat("fa-IR").format(n)
+  + " تومان";
+
+
+function renderOrderMenu(){
+
+  let html = "";
+
+  sections.forEach(section => {
+
+    html += `
+      <div class="panel">
+
+        <div class="title">
+          ${section[0]}
+        </div>
+
+        <div class="grid">
+    `;
+
+    section[1].forEach(item => {
+
+      html += `
+        <button
+          class="item"
+          onclick='addItem(${JSON.stringify(item[0])},${item[1]})'
+        >
+
+          <div class="name">
+            ${item[0]}
+          </div>
+
+          <div class="price">
+            ${money(item[1])}
+          </div>
+
+        </button>
+      `;
+
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+
+  });
+
+  document.getElementById("orderMenu").innerHTML = html;
+
+}
+
+
+function addItem(name,price){
+
+  if(!order[name]){
+    order[name] = {
+      name:name,
+      price:price,
+      qty:0
+    };
+  }
+
+  order[name].qty++;
+
+  renderOrder();
+
+}
+
+
+function changeQty(name,delta){
+
+  if(!order[name]) return;
+
+  order[name].qty += delta;
+
+  if(order[name].qty <= 0){
+    delete order[name];
+  }
+
+  renderOrder();
+
+}
+
+
+function removeItem(name){
+
+  delete order[name];
+
+  renderOrder();
+
+}
+
+
+function renderOrder(){
+
+  const box =
+    document.getElementById("items");
+
+  const arr =
+    Object.values(order);
+
+  let total = 0;
+
+
+  if(!arr.length){
+
+    box.innerHTML = `
+      <div class="order-empty">
+        هنوز آیتمی انتخاب نشده
+      </div>
+    `;
+
+    document.getElementById("total").textContent =
+      money(0);
+
+    return;
+  }
+
+
+  box.innerHTML = arr.map(item => {
+
+    const subtotal =
+      item.price * item.qty;
+
+    total += subtotal;
+
+    return `
+      <div class="order-row">
+
+        <div class="info">
+
+          <div class="name">
+            ${item.name}
+          </div>
+
+          <div class="price">
+            ${money(item.price)}
+          </div>
+
+        </div>
+
+
+        <div class="qty">
+
+          <button
+            onclick='changeQty(${JSON.stringify(item.name)},-1)'
+          >
+            −
+          </button>
+
+          <b>
+            ${item.qty}
+          </b>
+
+          <button
+            onclick='changeQty(${JSON.stringify(item.name)},1)'
+          >
+            +
+          </button>
+
+        </div>
+
+
+        <div class="sub">
+          ${money(subtotal)}
+        </div>
+
+
+        <button
+          class="remove"
+          onclick='removeItem(${JSON.stringify(item.name)})'
+        >
+          ×
+        </button>
+
+      </div>
+    `;
+
+  }).join("");
+
+
+  document.getElementById("total").textContent =
+    money(total);
+
+}
+
+
+function showPage(id,button){
+
+  document
+    .querySelectorAll(".page")
+    .forEach(page =>
+      page.classList.remove("active")
+    );
+
+
+  document
+    .getElementById(id)
+    .classList.add("active");
+
+
+  document
+    .querySelectorAll(".tabs button")
+    .forEach(btn =>
+      btn.classList.remove("active")
+    );
+
+
+  if(button){
+    button.classList.add("active");
+  }
+
+
+  window.scrollTo(0,0);
+
+}
+
+
+function makeInvoice(){
+
+  const arr =
+    Object.values(order);
+
+  let total = 0;
+
+
+  let html = arr.length
+    ?
+    `
+      <table>
+
+        <thead>
+          <tr>
+            <th>آیتم</th>
+            <th>تعداد</th>
+            <th>مبلغ</th>
+          </tr>
+        </thead>
+
+        <tbody>
+    `
+    :
+    `
+      <p style="text-align:center;color:#888">
+        سفارشی ثبت نشده است.
+      </p>
+    `;
+
+
+  arr.forEach(item => {
+
+    const subtotal =
+      item.price * item.qty;
+
+    total += subtotal;
+
+
+    html += `
+      <tr>
+
+        <td>
+          ${item.name}
+        </td>
+
+        <td>
+          ${item.qty}
+        </td>
+
+        <td>
+          ${money(subtotal)}
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+
+  if(arr.length){
+    html += `
+        </tbody>
+      </table>
+    `;
+  }
+
+
+  document.getElementById("invRows").innerHTML =
+    html;
+
+
+  document.getElementById("invTotal").textContent =
+    money(total);
+
+
+  document.getElementById("invTable").textContent =
+    document.getElementById("table").value || "-";
+
+
+  document.getElementById("invNote").textContent =
+    document.getElementById("note").value
+      ?
+      "یادداشت: "
+      + document.getElementById("note").value
+      :
+      "";
+
+
+  document.getElementById("date").textContent =
+    new Date().toLocaleString("fa-IR");
+
+
+  showPage(
+    "invoice",
+    document.querySelectorAll(".tabs button")[1]
+  );
+
+}
+
+
+function clearOrder(){
+
+  if(
+    confirm("سفارش فعلی پاک شود؟")
+  ){
+
+    Object
+      .keys(order)
+      .forEach(key =>
+        delete order[key]
+      );
+
+
+    document.getElementById("table").value =
+      "";
+
+    document.getElementById("note").value =
+      "";
+
+    renderOrder();
+
+  }
+
+}
+
+
+function renderFullMenu(){
+
+  let html =
+    "<h2>منوی FIT PACK</h2>";
+
+
+  sections.forEach(section => {
+
+    html += `
+      <h2>
+        ${section[0]}
+      </h2>
+    `;
+
+
+    html += section[1]
+      .map(item => `
+        <div class="menu-line">
+
+          <span>
+            ${item[0]}
+          </span>
+
+          <b>
+            ${money(item[1])}
+          </b>
+
+        </div>
+      `)
+      .join("");
+
+  });
+
+
+  document.getElementById("fullMenu").innerHTML =
+    html;
+
+}
+
+
+renderOrderMenu();
+renderFullMenu();
+renderOrder();
+
+</script>
+
+</body>
+</html>
